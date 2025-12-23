@@ -1,0 +1,25 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary Files
+*.tmp
+*.temp
+
+# Extension-specific
+.web-extension-id
+web-ext-artifacts/
+*.zip
+*.crx
+*.pem
+
+# Node modules (if using npm for development)
+node_modules/
+package-lock.json
