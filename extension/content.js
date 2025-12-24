@@ -72,12 +72,14 @@ function extractVideos() {
     const sources = video.querySelectorAll('source');
 
     if (src && src.startsWith('http')) {
+      const isM3u8 = src.includes('.m3u8') || src.includes('stream.video.skool.com');
       videos.push({
         platform: 'Skool',
         id: `native_${index}`,
-        type: 'native',
+        type: isM3u8 ? 'hls-stream' : 'native',
         url: src,
         downloadUrl: src,
+        isM3u8: isM3u8,
         title: metadata.lessonTitle,
         courseName: metadata.courseName
       });
@@ -85,12 +87,14 @@ function extractVideos() {
       sources.forEach((source, sourceIndex) => {
         const sourceSrc = source.src;
         if (sourceSrc && sourceSrc.startsWith('http')) {
+          const isM3u8 = sourceSrc.includes('.m3u8') || sourceSrc.includes('stream.video.skool.com');
           videos.push({
             platform: 'Skool',
             id: `native_${index}_${sourceIndex}`,
-            type: 'native',
+            type: isM3u8 ? 'hls-stream' : 'native',
             url: sourceSrc,
             downloadUrl: sourceSrc,
+            isM3u8: isM3u8,
             title: metadata.lessonTitle,
             courseName: metadata.courseName
           });

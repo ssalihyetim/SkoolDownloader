@@ -128,13 +128,13 @@ async function displayVideos(videos) {
       </div>
       ${titleDisplay}
       ${isM3u8 ? `
-        <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-          🎞️ HLS Stream (m3u8) - Use ffmpeg to download
+        <div style="font-size: 11px; color: #ff6b35; margin-bottom: 8px; font-weight: 600;">
+          🎞️ HLS Stream - Requires ffmpeg
         </div>
       ` : ''}
       <div class="video-actions">
         <button class="btn btn-primary" data-index="${index}" data-action="download">
-          ${isM3u8 ? '📋 Copy URL' : '⬇️ Download'}
+          ${isM3u8 ? '📋 Copy Command' : '⬇️ Download'}
         </button>
         <button class="btn btn-secondary" data-index="${index}" data-action="open">
           🎬 Open
@@ -170,31 +170,46 @@ async function displayVideos(videos) {
 
         // Check if it's an m3u8 stream
         if (isM3u8) {
+          // Generate proper filename for the command
+          const filename = await generateFilename(video);
+          const outputFilename = filename.replace(/\.mp4$/, '') || 'skool_video';
+
           // Copy URL and show instructions
           await navigator.clipboard.writeText(video.downloadUrl);
-          e.target.textContent = '✅ Copied!';
+          e.target.textContent = '✅ URL Copied!';
 
-          // Show instructions in a better way
+          // Show instructions with proper filename
+          const ffmpegCommand = `ffmpeg -headers "Referer: https://skool.com/" -i "${video.downloadUrl}" -c copy "${outputFilename}.mp4"`;
+
           const instructions = `
-M3U8 URL kopyalandı! İndirmek için:
+🎬 M3U8 Stream Detected
 
-Terminal'de şu komutu çalıştırın:
+The URL has been copied to clipboard!
 
-ffmpeg -headers "Referer: https://skool.com/" -i "${video.downloadUrl}" -c copy skool_video.mp4
+To download this HLS stream video:
 
-Veya daha basit:
-1. Extension'daki "Open" butonuna tıklayın
-2. Tarayıcının Developer Tools'unu açın (F12)
-3. Network tab → "m3u8" filtresi
-4. Videoyu oynatın
-5. URL'i kopyalayın ve yukarıdaki komutu kullanın
+1️⃣ Open Terminal (Mac/Linux) or Command Prompt (Windows)
+
+2️⃣ Paste and run this command:
+
+${ffmpegCommand}
+
+📋 The command is also copied to clipboard - just paste it!
+
+Note: You need ffmpeg installed. Install with:
+• Mac: brew install ffmpeg
+• Linux: sudo apt install ffmpeg
+• Windows: Download from ffmpeg.org
           `.trim();
+
+          // Copy the full command to clipboard
+          await navigator.clipboard.writeText(ffmpegCommand);
 
           alert(instructions);
 
           setTimeout(() => {
             e.target.disabled = false;
-            e.target.textContent = '📋 Copy URL';
+            e.target.textContent = '📋 Copy Command';
           }, 3000);
 
           return;
