@@ -39,9 +39,31 @@ XMLHttpRequest.prototype.open = function(method, url, ...rest) {
   return originalXHROpen.apply(this, [method, url, ...rest]);
 };
 
+// Extract page metadata
+function extractPageMetadata() {
+  // Try to get course name from URL or page
+  const urlMatch = window.location.pathname.match(/\/classroom\/([^\/]+)/);
+  const courseName = urlMatch ? urlMatch[1] : null;
+
+  // Try to get lesson title
+  let lessonTitle = document.querySelector('h1')?.textContent?.trim() ||
+                    document.querySelector('[class*="title"]')?.textContent?.trim() ||
+                    document.title;
+
+  // Clean up title
+  lessonTitle = lessonTitle.replace(/[<>:"/\\|?*]/g, '-').trim();
+
+  return {
+    courseName: courseName || 'skool-course',
+    lessonTitle: lessonTitle || 'video',
+    pageUrl: window.location.href
+  };
+}
+
 // Extract videos from current page
 function extractVideos() {
   const videos = [];
+  const metadata = extractPageMetadata();
 
   // Extract Skool native videos from <video> tags
   const skoolVideos = document.querySelectorAll('video');
@@ -55,7 +77,9 @@ function extractVideos() {
         id: `native_${index}`,
         type: 'native',
         url: src,
-        downloadUrl: src
+        downloadUrl: src,
+        title: metadata.lessonTitle,
+        courseName: metadata.courseName
       });
     } else if (sources.length > 0) {
       sources.forEach((source, sourceIndex) => {
@@ -66,7 +90,9 @@ function extractVideos() {
             id: `native_${index}_${sourceIndex}`,
             type: 'native',
             url: sourceSrc,
-            downloadUrl: sourceSrc
+            downloadUrl: sourceSrc,
+            title: metadata.lessonTitle,
+            courseName: metadata.courseName
           });
         }
       });
@@ -82,7 +108,9 @@ function extractVideos() {
         type: 'hls-stream',
         url: url,
         downloadUrl: url,
-        isM3u8: true
+        isM3u8: true,
+        title: metadata.lessonTitle,
+        courseName: metadata.courseName
       });
     }
   });
@@ -95,7 +123,9 @@ function extractVideos() {
         id: `network_${index}`,
         type: 'network-capture',
         url: url,
-        downloadUrl: url
+        downloadUrl: url,
+        title: metadata.lessonTitle,
+        courseName: metadata.courseName
       });
     }
   });
@@ -115,7 +145,9 @@ function extractVideos() {
           id: `script_${index}`,
           type: 'script-extracted',
           url: url,
-          downloadUrl: url
+          downloadUrl: url,
+          title: metadata.lessonTitle,
+          courseName: metadata.courseName
         });
       }
     });
@@ -132,7 +164,9 @@ function extractVideos() {
           id: `data_${index}`,
           type: 'data-attribute',
           url: url,
-          downloadUrl: url
+          downloadUrl: url,
+          title: metadata.lessonTitle,
+          courseName: metadata.courseName
         });
       }
     }
@@ -150,7 +184,9 @@ function extractVideos() {
         id: videoId,
         type: 'iframe',
         url: src,
-        embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`
+        embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`,
+        title: metadata.lessonTitle,
+        courseName: metadata.courseName
       });
     }
   });
@@ -169,7 +205,9 @@ function extractVideos() {
           platform: 'Wistia',
           id: videoId,
           type: 'inline',
-          embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`
+          embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`,
+          title: metadata.lessonTitle,
+          courseName: metadata.courseName
         });
       }
     }
@@ -187,7 +225,9 @@ function extractVideos() {
         id: videoId,
         type: 'iframe',
         url: src,
-        shareUrl: `https://www.loom.com/share/${videoId}`
+        shareUrl: `https://www.loom.com/share/${videoId}`,
+        title: metadata.lessonTitle,
+        courseName: metadata.courseName
       });
     }
   });

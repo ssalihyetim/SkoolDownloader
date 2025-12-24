@@ -43,6 +43,33 @@ async function extractVideos() {
   }
 }
 
+// Generate filename from video metadata
+async function generateFilename(video) {
+  const settings = await chrome.storage.sync.get({
+    namingPattern: '{course}/{title}',
+    downloadPath: ''
+  });
+
+  // Clean strings for filename
+  const clean = (str) => str.replace(/[<>:"/\\|?*]/g, '-').trim();
+
+  const courseName = clean(video.courseName || 'skool-course');
+  const title = clean(video.title || `${video.platform}_${video.id}`);
+  const platform = video.platform.toLowerCase();
+  const id = video.id;
+
+  let filename = settings.namingPattern
+    .replace('{course}', courseName)
+    .replace('{title}', title)
+    .replace('{platform}', platform)
+    .replace('{id}', id);
+
+  // Add extension
+  filename += '.mp4';
+
+  return filename;
+}
+
 // Display videos in the popup
 function displayVideos(videos) {
   statusDiv.style.display = 'none';
@@ -51,6 +78,11 @@ function displayVideos(videos) {
   videoListDiv.innerHTML = `
     <div class="alert alert-success">
       ✅ Found ${videos.length} video${videos.length > 1 ? 's' : ''}
+    </div>
+    <div style="text-align: right; margin-bottom: 10px;">
+      <button id="settingsBtn" class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">
+        ⚙️ Settings
+      </button>
     </div>
   `;
 
@@ -62,14 +94,18 @@ function displayVideos(videos) {
 
     const isM3u8 = video.isM3u8 || video.downloadUrl?.includes('.m3u8');
 
+    // Display video title if available
+    const titleDisplay = video.title ? `<div class="video-title">${video.title}</div>` : '';
+
     videoItem.innerHTML = `
       <div class="video-header">
         <span class="platform-badge ${platformClass}">${video.platform}</span>
         <span class="video-id">${video.type || video.id}</span>
       </div>
+      ${titleDisplay}
       ${isM3u8 ? `
         <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-          🎞️ HLS Stream (m3u8) - Kullanım talimatları için Copy URL
+          🎞️ HLS Stream (m3u8) - Use ffmpeg to download
         </div>
       ` : ''}
       <div class="video-actions">
@@ -83,6 +119,11 @@ function displayVideos(videos) {
     `;
 
     videoListDiv.appendChild(videoItem);
+  });
+
+  // Add settings button listener
+  document.getElementById('settingsBtn')?.addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
   });
 
   // Add event listeners
@@ -131,10 +172,13 @@ Veya daha basit:
 
         // Check if video has direct download URL (Skool native MP4)
         if (video.downloadUrl && !isM3u8) {
+          // Generate proper filename
+          const filename = await generateFilename(video);
+
           // Direct download URL available
           chrome.downloads.download({
             url: video.downloadUrl,
-            filename: `${video.platform}_${video.id}.mp4`,
+            filename: filename,
             saveAs: true
           });
           e.target.textContent = '✅ Started!';
@@ -147,10 +191,14 @@ Veya daha basit:
           });
 
           if (response && response.downloadUrl) {
+            // Merge response data with video data
+            const mergedVideo = { ...video, ...response };
+            const filename = await generateFilename(mergedVideo);
+
             // Direct download URL available
             chrome.downloads.download({
               url: response.downloadUrl,
-              filename: `${video.platform}_${video.id}.mp4`,
+              filename: filename,
               saveAs: true
             });
             e.target.textContent = '✅ Started!';
@@ -161,7 +209,7 @@ Veya daha basit:
 
             e.target.textContent = '📺 Opened';
             // Show instruction
-            alert('Video açıldı! Sayfada sağ tıklayıp "Save video as..." seçin veya tarayıcınızın indirme özelliğini kullanın.');
+            alert('Video opened in new tab! Right-click on the video and select "Save video as..." or use your browser\'s download feature.');
           }
         }
 

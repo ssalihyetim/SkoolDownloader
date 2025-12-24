@@ -1,6 +1,33 @@
 // Background service worker
 console.log('Skool Video Downloader: Background script loaded');
 
+// Generate filename from video metadata
+function generateFilename(video, settings) {
+  let filename = '';
+
+  // Use naming pattern from settings
+  const pattern = settings?.namingPattern || '{course}/{title}';
+
+  // Clean strings for filename
+  const clean = (str) => str.replace(/[<>:"/\\|?*]/g, '-').trim();
+
+  const courseName = clean(video.courseName || 'skool-course');
+  const title = clean(video.title || `${video.platform}_${video.id}`);
+  const platform = video.platform.toLowerCase();
+  const id = video.id;
+
+  filename = pattern
+    .replace('{course}', courseName)
+    .replace('{title}', title)
+    .replace('{platform}', platform)
+    .replace('{id}', id);
+
+  // Add extension
+  filename += '.mp4';
+
+  return filename;
+}
+
 // Fetch video info from Wistia
 async function getWistiaVideoInfo(videoId) {
   try {

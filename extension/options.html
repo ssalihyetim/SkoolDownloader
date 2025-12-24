@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skool Video Downloader - Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      color: #555;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .variables {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .variables code {
+      display: inline-block;
+      background: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin: 2px;
+      font-size: 12px;
+      color: #667eea;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 20px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .example {
+      background: #e8f4f8;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .example strong {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Settings</h1>
+    <p class="subtitle">Configure your video download preferences</p>
+
+    <div class="section">
+      <h2>📁 File Naming</h2>
+
+      <div class="form-group">
+        <label for="namingPattern">Naming Pattern</label>
+        <input type="text" id="namingPattern" placeholder="{course}/{title}">
+        <div class="help-text">
+          Define how downloaded videos should be named and organized
+        </div>
+        <div class="variables">
+          <strong style="font-size: 12px; display: block; margin-bottom: 6px;">Available variables:</strong>
+          <code>{course}</code>
+          <code>{title}</code>
+          <code>{platform}</code>
+          <code>{id}</code>
+        </div>
+        <div class="example">
+          <strong>Example:</strong> <code>{course}/{title}</code><br>
+          <strong>Result:</strong> <code>skool-course/Lesson-1-Introduction.mp4</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💡 Tips</h2>
+      <ul style="padding-left: 20px; color: #555; font-size: 14px; line-height: 1.8;">
+        <li>Use <code>/</code> to create folders (e.g., <code>{course}/{title}</code>)</li>
+        <li>Chrome will always show a save dialog where you can choose the final location</li>
+        <li>Invalid characters will be automatically replaced with dashes</li>
+        <li>The extension will suggest the filename based on your pattern</li>
+      </ul>
+    </div>
+
+    <div class="button-group">
+      <button type="button" class="btn-secondary" id="resetBtn">Reset to Default</button>
+      <button type="button" class="btn-primary" id="saveBtn">💾 Save Settings</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
