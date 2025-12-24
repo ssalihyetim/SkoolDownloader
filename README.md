@@ -47,11 +47,21 @@ Click the extension icon - it will automatically scan for videos
 downloads/{course}/{title} → downloads/my-course/lesson-1-intro.mp4
 ```
 
-### 4. Download Videos
+### 4. Enable "Ask Where to Save" in Chrome (Important!)
+To choose where videos are saved:
+- Go to `chrome://settings/downloads`
+- Enable **"Ask where to save each file before downloading"**
+- Or click the link in the extension's tip message
+
+Without this setting, Chrome will download directly to your Downloads folder.
+
+### 5. Download Videos
 - Click **⬇️ Download** on any video
 - Chrome will show a "Save As" dialog with the suggested filename
 - Choose where to save it
 - Done!
+
+📘 **Detailed guide:** See [CHROME_SETTINGS.md](CHROME_SETTINGS.md) for help with Chrome download settings
 
 ## How It Works
 

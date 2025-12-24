@@ -70,15 +70,39 @@ async function generateFilename(video) {
   return filename;
 }
 
+// Check if user has been shown the Chrome settings tip
+async function checkAndShowChromeTip() {
+  const { shownChromeTip } = await chrome.storage.local.get({ shownChromeTip: false });
+
+  if (!shownChromeTip) {
+    return `
+      <div class="alert alert-info" style="font-size: 12px; margin-bottom: 10px; position: relative;">
+        <button id="dismissTip" style="position: absolute; right: 8px; top: 8px; border: none; background: none; cursor: pointer; font-size: 16px; color: #666;">×</button>
+        <div style="margin-right: 20px;">
+          💡 <strong>Tip:</strong> To choose where to save videos, enable
+          <a href="chrome://settings/downloads" target="_blank" style="color: #1976d2; text-decoration: underline;">
+            "Ask where to save"
+          </a>
+          in Chrome settings.
+        </div>
+      </div>
+    `;
+  }
+  return '';
+}
+
 // Display videos in the popup
-function displayVideos(videos) {
+async function displayVideos(videos) {
   statusDiv.style.display = 'none';
   videoListDiv.style.display = 'block';
+
+  const chromeTip = await checkAndShowChromeTip();
 
   videoListDiv.innerHTML = `
     <div class="alert alert-success">
       ✅ Found ${videos.length} video${videos.length > 1 ? 's' : ''}
     </div>
+    ${chromeTip}
     <div style="text-align: right; margin-bottom: 10px;">
       <button id="settingsBtn" class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">
         ⚙️ Settings
@@ -124,6 +148,12 @@ function displayVideos(videos) {
   // Add settings button listener
   document.getElementById('settingsBtn')?.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
+  });
+
+  // Add dismiss tip listener
+  document.getElementById('dismissTip')?.addEventListener('click', async () => {
+    await chrome.storage.local.set({ shownChromeTip: true });
+    document.querySelector('.alert-info')?.remove();
   });
 
   // Add event listeners
