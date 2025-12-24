@@ -61,7 +61,23 @@ Without this setting, Chrome will download directly to your Downloads folder.
 - Choose where to save it
 - Done!
 
-📘 **Detailed guide:** See [CHROME_SETTINGS.md](CHROME_SETTINGS.md) for help with Chrome download settings
+📘 **Guides:**
+- [CHROME_SETTINGS.md](CHROME_SETTINGS.md) - Chrome download settings help
+- [M3U8_DOWNLOAD_GUIDE.md](M3U8_DOWNLOAD_GUIDE.md) - How to download HLS/M3U8 streams
+- [USER_GUIDE.md](USER_GUIDE.md) - Complete user guide
+
+## Video Types
+
+The extension handles different video types:
+
+1. **Direct MP4** (Wistia, some Skool) - Downloads directly with Chrome
+2. **M3U8/HLS Streams** (Most Skool native videos) - Requires ffmpeg command-line tool
+
+For M3U8 streams:
+- Extension provides ready-to-use ffmpeg command
+- Includes proper filename from your naming pattern
+- Just paste and run in Terminal
+- See [M3U8_DOWNLOAD_GUIDE.md](M3U8_DOWNLOAD_GUIDE.md) for details
 
 ## How It Works
 
