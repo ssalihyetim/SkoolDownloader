@@ -31,26 +31,58 @@ function generateFilename(video, settings) {
 // Fetch video info from Wistia
 async function getWistiaVideoInfo(videoId) {
   try {
-    // Try oEmbed API
-    const oembedUrl = `https://fast.wistia.com/oembed?url=https://fast.wistia.net/embed/iframe/${videoId}`;
-    const response = await fetch(oembedUrl);
+    // First try to get media info from Wistia API
+    const mediaUrl = `https://fast.wistia.com/embed/medias/${videoId}.json`;
+    let downloadUrl = null;
+    let title = null;
 
-    if (!response.ok) {
-      throw new Error('oEmbed API failed');
+    try {
+      const mediaResponse = await fetch(mediaUrl);
+      if (mediaResponse.ok) {
+        const mediaData = await mediaResponse.json();
+        console.log('Wistia media data:', mediaData);
+
+        // Extract title
+        title = mediaData.media?.name || mediaData.name;
+
+        // Try to find MP4 asset
+        const assets = mediaData.media?.assets || mediaData.assets || [];
+        const mp4Asset = assets.find(asset =>
+          asset.type === 'original' ||
+          asset.type === 'mp4_video' ||
+          asset.container === 'mp4'
+        );
+
+        if (mp4Asset && mp4Asset.url) {
+          downloadUrl = mp4Asset.url;
+          console.log('Found Wistia MP4 URL:', downloadUrl);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch Wistia media info:', err);
     }
 
-    const data = await response.json();
+    // Also try oEmbed API for title
+    if (!title) {
+      try {
+        const oembedUrl = `https://fast.wistia.com/oembed?url=https://fast.wistia.net/embed/iframe/${videoId}`;
+        const response = await fetch(oembedUrl);
+        if (response.ok) {
+          const data = await response.json();
+          title = data.title;
+        }
+      } catch (err) {
+        console.warn('Could not fetch Wistia oEmbed:', err);
+      }
+    }
 
     return {
       id: videoId,
-      title: data.title || `Wistia Video ${videoId}`,
-      thumbnail: data.thumbnail_url,
-      duration: data.duration,
+      title: title || `Wistia Video ${videoId}`,
       platform: 'Wistia',
-      // Wistia videos need to be accessed via their embed page
-      downloadUrl: null,
+      downloadUrl: downloadUrl,
       embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`,
-      needsExtraction: true
+      needsExtraction: !downloadUrl
     };
   } catch (error) {
     console.error('Failed to fetch Wistia info:', error);
@@ -58,6 +90,7 @@ async function getWistiaVideoInfo(videoId) {
       id: videoId,
       title: `Wistia Video ${videoId}`,
       platform: 'Wistia',
+      downloadUrl: null,
       embedUrl: `https://fast.wistia.net/embed/iframe/${videoId}`,
       needsExtraction: true
     };

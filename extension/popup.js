@@ -175,11 +175,22 @@ Veya daha basit:
           // Generate proper filename
           const filename = await generateFilename(video);
 
+          console.log('Attempting download:', { url: video.downloadUrl, filename });
+
           // Direct download URL available
           chrome.downloads.download({
             url: video.downloadUrl,
             filename: filename,
             saveAs: true
+          }, (downloadId) => {
+            if (chrome.runtime.lastError) {
+              console.error('Download error:', chrome.runtime.lastError);
+              alert(`Download failed: ${chrome.runtime.lastError.message}\n\nTrying alternative method...`);
+              // Fallback: open in new tab
+              chrome.tabs.create({ url: video.downloadUrl });
+            } else {
+              console.log('Download started:', downloadId);
+            }
           });
           e.target.textContent = '✅ Started!';
         } else {
@@ -195,21 +206,43 @@ Veya daha basit:
             const mergedVideo = { ...video, ...response };
             const filename = await generateFilename(mergedVideo);
 
+            console.log('Attempting download from API:', { url: response.downloadUrl, filename });
+
             // Direct download URL available
             chrome.downloads.download({
               url: response.downloadUrl,
               filename: filename,
               saveAs: true
+            }, (downloadId) => {
+              if (chrome.runtime.lastError) {
+                console.error('Download error:', chrome.runtime.lastError);
+                alert(`Download failed: ${chrome.runtime.lastError.message}\n\nOpening video page instead...`);
+                // Fallback: open video page
+                const url = video.embedUrl || video.shareUrl || video.url;
+                chrome.tabs.create({ url });
+              } else {
+                console.log('Download started:', downloadId);
+              }
             });
             e.target.textContent = '✅ Started!';
           } else {
-            // No direct URL, open video page
+            // No direct URL available - need manual download
             const url = video.embedUrl || video.shareUrl || video.url;
-            chrome.tabs.create({ url });
 
             e.target.textContent = '📺 Opened';
-            // Show instruction
-            alert('Video opened in new tab! Right-click on the video and select "Save video as..." or use your browser\'s download feature.');
+
+            // Show platform-specific instructions
+            let instructions = '';
+            if (video.platform === 'Wistia') {
+              instructions = `Wistia video opened in new tab.\n\nTo download:\n1. Play the video\n2. Right-click on the video player\n3. Select "Save video as..."\n\nOr use browser DevTools to find the video URL.`;
+            } else if (video.platform === 'Loom') {
+              instructions = `Loom video opened in new tab.\n\nTo download:\n1. Click the "..." menu on the video\n2. Select "Download"\n\nNote: You may need to be logged into Loom.`;
+            } else {
+              instructions = `Video opened in new tab.\n\nTo download:\n1. Right-click on the video\n2. Select "Save video as..."\n\nOr check browser DevTools Network tab.`;
+            }
+
+            alert(instructions);
+            chrome.tabs.create({ url });
           }
         }
 
